@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+  <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <link rel="stylesheet" href="css/map2.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script src="js/knockout.js"></script>
+
+<title> Map </title>  
+
+    <link href="http://getbootstrap.com/docs/4.0/examples/starter-template/starter-template.css" rel="stylesheet">
+  </head>
+  <body>
+        <nav class="navbar navbar-inverse navbar-fixed-top">
+                <div class="container">
+                  <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                      <span class="sr-only">Toggle navigation</span>
+                      <span class="icon-bar"></span>
+                      <span class="icon-bar"></span>
+                      <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#" id="self">
+                        Neighbourhood Map</a>
+                  </div>
+                  <div id="navbar" class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                                     
+                      <li class="dropdown">
+                        <a href="#" class="dropdown-toggle active" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Map display<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                          <li><a href="#" id="night">Night Mode</a></li>
+                          <li><a href="#" id="dark">Dark Mode</a></li>
+                          <li><a href="#" id="dark_aqua">Dark Aqua Mode</a></li>
+                          <!-- <li role="separator" class="divider"></li>
+                          <li class="dropdown-header">Nav header</li>
+                          <li><a href="#">Separated link</a></li>
+                          <li><a href="#">One more separated link</a></li> -->
+                        </ul>
+                      </li>
+
+                      <li class="dropdown">
+                            <a href="#" class="dropdown-toggle active btn-outline-success" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Show<span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                              <li><a href="#" id="restaurant">Restaurants</a></li>
+                              <li><a href="#" id="atm">ATM</a></li>
+                              <li><a href="#" id="hospitals">Hospitals</a></li>
+                              <li role="separator" class="divider"></li>
+                              <li class="dropdown-header">Others</li>
+                              <li><a href="#" id="airport">Airport</a></li>
+                              <li><a href="#" id="bank">Banks</a></li>
+                            </ul>
+                          </li>
+                    </ul>
+                                     
+                  </div><!--/.nav-collapse -->
+                </div>
+              </nav>
+
+  
+    <!-- <input id="pac-input" class="controls"  type="text" placeholder="Search Box">
+    <div id="map"></div> -->
+
+    <div class="container">     
+      <input id="pac-input" class="controls form-control" size="10" type="text" placeholder="Search Box">
+      <div id="map"></div>
+
+        <div class="options-box bg-warning">
+            <h1><span class="label label-default"> <strong>Welcome to bangalore</strong></span></h1>
+           
+    <div>
+         <h4><span class="text-muted"> You have <b data-bind="text: incompleteTasks().length">&nbsp;</b> travel destinations(s)
+                <span data-bind="visible: incompleteTasks().length == 0"> - May be its time for a break!</span></span></h4>
+            
+    </div>
+            <form class="form-inline" data-bind="submit: addTask">
+                Add place: <input  size="30" class="controls form-control" data-bind="value: newTaskText" placeholder="What's your next destination?" />
+                <button class="btn btn-success"  type="submit">Add</button>
+            </form>
+            Add id="take_input" to above input element to enable auto filling.
+            
+            <!-- <ul class="list-group" data-bind="foreach: tasks, visible: tasks().length > 0">
+                <li class="list-group-item">
+                    <input type="checkbox" data-bind="checked: isDone" />
+                    <! <input type="checkbox" data-bind="checked: isDone,click:$parent.checkon" /> -->
+                    <!-- <span data-bind="text: title"></span>
+                   <a href="#" class="btn btn-info"data-bind="click: $parent.removeTask">
+                      <span class="glyphicon glyphicon-trash"> 
+                        Delete</span></a>
+                </li> 
+            </ul>     --> 
+            <table class="table table-bordered table-striped">
+                <thead >
+                    <tr>
+                      <th>Visited</th>
+                      <th>Destination</th>
+                      <th>Delete</th>
+                    </tr>
+                  </thead>
+               
+                <tbody data-bind="foreach: tasks">
+                    <tr>
+                      <td> <input type="checkbox" data-bind="checked: isDone" /></td>
+                        <td data-bind="text: title"></td>
+                        <td>
+                          <a href="#" class="btn btn-info"data-bind="click: $parent.removeTask">
+                             <span class="glyphicon glyphicon-trash"> 
+                               Delete</span></a></td>
+                    </tr>
+                </tbody>
+            </table>
+        
+            
+           
+    
+            <div class="near">
+    
+              <ul data-bind="foreach: nearPlaces, visible: nearPlaces().length > 0">
+                <li ><p data-bind="value:loc"></p></li>
+              </ul>
+    
+            </div>
+    
+          </div>
+      
+      
+    </div>
+ <script src="js/config.js"></script> 
+    <script src="js/map2.js"></script>
+    <!-- <script src="js/viewmodel.js"></script> -->
+    
+    <script async defer src="https://maps.googleapis.com/maps/api/js?v=3.exp&key=AIzaSyDqScH7XDNT11svhIMwZ0sCBmTYgaLFgxU&libraries=places&callback=initAutocomplete"
+         ></script>
+  </body>
+</html>
