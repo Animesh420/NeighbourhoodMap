@@ -82,7 +82,7 @@ function initAutocomplete() {
                 stylers: [{ color: "#17263c" }]
             }
         ],
-      "dark": [
+        "dark": [
             {
                 "elementType": "geometry",
                 "stylers": [
@@ -583,10 +583,14 @@ function initAutocomplete() {
     // Default Image URL
     var noImageFound = "img/noImage.png";
     var photoUrl = "";
-    var imarkerArray=[];
-
+    var imarkerArray = [];
     var markersShow = [];
-
+    var redMarker = "http://maps.google.com/mapfiles/ms/icons/red-dot.png";
+    var blueMarker = "http://maps.google.com/mapfiles/ms/icons/blue-dot.png";
+    var orangeMarker = "http://maps.google.com/mapfiles/ms/icons/orange-dot.png";
+    var greenMarker = "http://maps.google.com/mapfiles/ms/icons/green-dot.png";
+    var CLIENT_ID_FOURSQUARE = configObject.fourSquare_client_id;
+    var CLIENT_SECRET_FOURSQUARE = configObject.fourSquare_client_secret;
     // Setting up map,central location and some other commonly used variables.
     var bounds = new google.maps.LatLngBounds();
     var userMarkers = {};
@@ -599,6 +603,8 @@ function initAutocomplete() {
         zoom: 12,
         mapTypeId: "roadmap"
     });
+
+    map.setOptions({markers:[]});
 
     // Keyboard shortcuts
     var trafficFlag = false;
@@ -660,7 +666,7 @@ function initAutocomplete() {
 
 
     function setMapOnAll(map) {
-        for ( let i = 0; i < markersShow.length; i+=1) {
+        for (let i = 0; i < markersShow.length; i += 1) {
             markersShow[i].setMap(map);
         }
     }
@@ -683,31 +689,26 @@ function initAutocomplete() {
     var darkButton = document.getElementById("dark");
     var darkAquaButton = document.getElementById("dark_aqua");
     var reload = document.getElementById("self");
-
+    var firstTenPlaces = [];
     function initialize() {
-        
-        // var take_input = document.getElementById('take_input');
-        // var autocomplete = new google.maps.places.Autocomplete(take_input);
-        // var insearchBox = new google.maps.places.SearchBox(take_input);
-        // map.controls[google.maps.ControlPosition.TOP_LEFT].push(take_input);
 
-        // // Bias the SearchBox results towards current map's viewport.
-        // map.addListener('bounds_changed', function() {
-        //   insearchBox.setBounds(map.getBounds());
-        // });
-        }
-        
-    google.maps.event.addDomListener(window, 'load', initialize);
+
+    }
+
+    google.maps.event.addDomListener(window, "load", initialize);
     google.maps.event.addDomListener(nightButton, "click", changeToNight);
     google.maps.event.addDomListener(darkButton, "click", changeToDark);
     google.maps.event.addDomListener(darkAquaButton, "click", changeToDarkAqua);
     google.maps.event.addDomListener(reload, "click", reloadWindow);
 
+
+    var isInfoOpen = function(arg){
+        var map = arg.getMap();
+        return (map !== null && typeof map !== "undefined");};
     // Creates marker by location
-    function createMarkerByLocation(location) {
+    function createMarkerByLocation(location, dont_zoom) {
+        if (location === "") { return; }
         var geocoder = new google.maps.Geocoder();
-
-
         geocoder.geocode({ "address": location }, function (results, status) {
             if (status == google.maps.GeocoderStatus.OK) {
 
@@ -715,62 +716,71 @@ function initAutocomplete() {
 
                 var additional_content = `<ul>`;
                 var picUrl = ``;
-                var noContent = false;
+                var noContent = true;
                 // Using the foursquare API
-                $.ajax(
-                    {
-                        url: "https://api.foursquare.com/v2/venues/search",
-                        type: "GET",
-                        dataType: "json",
-                        extra: additional_content,
-                        data:
-                        "&ll=" + results[0].geometry.location.lat() + "," + results[0].geometry.location.lng() +
-                        "&client_id=" + "JSNVUSCLVNPREPKABLJVSS0LRAIOH2M44GD1WEUEY2DECEMF" +
-                        "&client_secret=" + "5DWGHQUKB1PLYERIYXLZTIVGQEG4FAPEEJNNHDOHVS1OXZIS" +
-                        "&v=20161016",
-                        async: true,
-                        success: function (result) {
-                            var tr = result.response.venues;
-                            var temp = tr.slice(1, tr.length > 4 ? 4 : tr.length);
-                            var interestPlaces = tr.slice(1,tr.length>10?10:tr.length);
+                if (dont_zoom != false) {
+                    $.ajax(
+                        {
+                            url: "https://api.foursquare.com/v2/venues/search",
+                            type: "GET",
+                            dataType: "json",
+                            extra: additional_content,
+                            data:
+                            "&ll=" + results[0].geometry.location.lat() + "," + results[0].geometry.location.lng() +
+                            "&client_id=" + CLIENT_ID_FOURSQUARE +
+                            "&client_secret=" + CLIENT_SECRET_FOURSQUARE +
+                            "&v=20161016",
+                            async: true,
+                            success: function (result) {
+                                var tr = result.response.venues;
+                                var temp = tr.slice(1, tr.length > 4 ? 4 : tr.length);
+                                if (dont_zoom != false) {
+                                    var interestPlaces = tr.slice(1, tr.length > 10 ? 10 : tr.length);
 
-                            interestPlaces.forEach(function(element) {
-                                var imarker = new google.maps.Marker({
-                                    map: map,
-                                    position: new google.maps.LatLng(element.location.lat, element.location.lng),
-                                    icon: "https://maps.google.com/mapfiles/kml/pal3/icon55.png",
-                                    title:element.name
+                                    interestPlaces.forEach(function (element) {
+                                        var imarker = new google.maps.Marker({
+                                            map: map,
+                                            position: new google.maps.LatLng(element.location.lat, element.location.lng),
+                                            icon: "https://maps.google.com/mapfiles/kml/pal3/icon55.png",
+                                            title: element.name
+                                        });
+                                        imarkerArray.push(imarker);
+                                    });
+                                }
+                                if (tr.length == 0) {
+                                    noContent = true;
+                                }
+                                else {
+                                    noContent = false;
+                                }
+                                temp.forEach(function (element) {
+                                    additional_content += `<li>${element.name}</li>`;
                                 });
-                            imarkerArray.push(imarker);
-                            });
-                            if (tr.length == 0) {
-                                noContent = true;
-                            }
-                            temp.forEach(function (element) {
-                                additional_content += `<li>${element.name}</li>`;
-                            });
-                            additional_content += "</ul>";
+                                additional_content += "</ul>";
 
-                        },
-                        error: function (error) { alert(error); }
-                    }
+                            },
+                            error: function (error) { console.log(error); }
+                        }
 
-                );
+                    );
+                }
 
                 var locMarker = new google.maps.Marker({
                     map: map,
-                    icon: "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png",
+                    icon: orangeMarker,
                     title: location,
                     animation: google.maps.Animation.DROP,
                     draggable: true,
                     position: results[0].geometry.location
                 });
 
+                map.markers.push(locMarker);
 
 
                 google.maps.event.addListener(locMarker, "click", function (locMarker, location, results) {
                     return function () {
-                        toggleMarker(locMarker);
+                        toggleMarker(locMarker,orangeMarker,greenMarker);
+                        locMarker.setAnimation(google.maps.Animation.DOWN);
                         picUrl = "img/noImage.png";
                         var serviceClick = new google.maps.places.PlacesService(map);
                         var myloc = new google.maps.LatLng(picLocation.lat(), picLocation.lng());
@@ -791,7 +801,7 @@ function initAutocomplete() {
 
 
                                 }
-                           let  content_string = `<div class="card" style="width: 20rem;">
+                                let content_string = `<div class="card" style="width: 20rem;">
                         <img class="card-img-top" src="${picUrl}" height="10%" width="100%" >
                         <div class="card-block">
                           <h4 class="card-title">${location}</h4>
@@ -799,12 +809,21 @@ function initAutocomplete() {
                         </div>
                       </div>`;
                                 if (!noContent) {
-                                    content_string += `<h5> Nearby Places </h5>` + additional_content;
+                                    content_string += `<h5> Nearby Places (<small>Powered by Foursquare</small>) </h5>` + additional_content;
                                 }
                                 var infoUserWindow = new google.maps.InfoWindow({});
-
                                 infoUserWindow.setContent(content_string);
+                              if (locMarker.infoWindow)
+                              {
+                                locMarker.infoWindow.close();
+                                locMarker.infoWindow = null;
+                              }
+                              else{
                                 infoUserWindow.open(map, locMarker);
+                                locMarker.setOptions({
+                                    "infoWindow":infoUserWindow
+                                });
+                              }
 
                             }
 
@@ -814,17 +833,20 @@ function initAutocomplete() {
                 }(locMarker, location, results));
 
                 userMarkers[location] = locMarker;
-                imarkerArray.forEach(function(element){
+                imarkerArray.forEach(function (element) {
                     element.setMap(map);
                 });
+                vm.locMarkerArray[location] = locMarker;
                 locMarker.setMap(map);
-                map.setOptions(
-                    {
-                        center: results[0].geometry.location,
-                        zoom: 18,
-                        mapTypeId: "roadmap"
-                    }
-                );
+                if (dont_zoom !== false) {
+                    map.setOptions(
+                        {
+                            center: results[0].geometry.location,
+                            zoom: 18,
+                            mapTypeId: "roadmap"
+                        }
+                    );
+                }
             }
         });
     }
@@ -837,7 +859,6 @@ function initAutocomplete() {
     var airport = document.getElementById("airport");
     var hospital = document.getElementById("hospitals");
 
-
     // Knockout js to update the lists dynamically
     function Task(data) {
         this.title = ko.observable(data.title);
@@ -846,10 +867,10 @@ function initAutocomplete() {
         this.isDone.subscribe(function (text) {
             for (var key in userMarkers) {
                 if (key == `${data.title} ,${city}` && text == true) {
-                    userMarkers[key].setIcon("http://maps.google.com/mapfiles/ms/icons/green-dot.png");
+                    userMarkers[key].setIcon(greenMarker);
                 }
                 else if (key == `${data.title} ,${city}` && text == false) {
-                    userMarkers[key].setIcon("http://maps.google.com/mapfiles/ms/icons/yellow-dot.png");
+                    userMarkers[key].setIcon(redMarker);
                 }
             }
         }, this);
@@ -861,17 +882,68 @@ function initAutocomplete() {
         // Data
 
         var self = this;
+        self.locMarkerArray = {};
+        self.items = ko.observableArray([
+            { name: "Lalabagh Botanical Gardens" },
+            { name: "IISC Bangalore" },
+            { name:"ISKCON Temple Bangalore" },
+            { name:"Cubbon Park Bangalore" },
+            { name: "Toit, Bangalore" },
+            { name:"Novotel,Bangalore"}
+        ]);
+        self.items().forEach(function (element) {
+            createMarkerByLocation(element.name, false);
+        });
+
+        self.filter = ko.observable("");
+
+        self.stringStartsWith = function (string, startsWith) {
+            string = string || "";
+            if (startsWith.length > string.length)
+                return false;
+            return string.substring(0, startsWith.length) === startsWith;
+        };
+
+        self.filteredItems = ko.computed(function () {
+
+            var filter = self.filter().toLowerCase();
+            if (!filter) {
+                return self.items();
+            } else {
+
+                return ko.utils.arrayFilter(self.items(), function (item) {
+                    return self.stringStartsWith(item.name.toLowerCase(), self.filter().toLowerCase());
+                });
+            }
+        }, self);
+
+        self.filteredItems.subscribe(function () {
+            // self.filteredItems().forEach(function (element) {
+            //     console.log(element);
+            // });
+            for (var propt in self.locMarkerArray) {
+                self.locMarkerArray[propt].setMap(null);
+            }
+            self.filteredItems().forEach(function (element) {
+                createMarkerByLocation(element.name, false);
+            });
+
+        });
         self.nearPlaces = ko.observableArray([]);
         self.tasks = ko.observableArray([]);
         self.newTaskText = ko.observable();
-
+        self.windowOpened = false;
         self.incompleteTasks = ko.computed(function () {
-            return ko.utils.arrayFilter(self.tasks(), 
-                                        function (task) { return !task.isDone(); })
+            return ko.utils.arrayFilter(self.tasks(),
+                function (task) { return !task.isDone(); });
         });
 
 
         // Operations
+        self.handleClick = function(event){
+        var thisMarker = self.locMarkerArray[event.name];
+           google.maps.event.trigger(thisMarker, "click");
+        }
 
         self.addTask = function () {
             var pointOfInterest = self.newTaskText();
@@ -885,7 +957,7 @@ function initAutocomplete() {
             for (var key in userMarkers) {
                 if (key == self.taskName) {
                     userMarkers[key].setMap(null);
-                    imarkerArray.forEach(function(element){
+                    imarkerArray.forEach(function (element) {
                         element.setMap(null);
                         imarkerArray = [];
                     });
@@ -893,7 +965,8 @@ function initAutocomplete() {
             }
         };
     }
-    ko.applyBindings(new TaskListViewModel());
+    var vm = new TaskListViewModel();
+    ko.applyBindings(vm);
 
     // Creating grouped markers
     function findLocations(service, request) {
@@ -903,7 +976,7 @@ function initAutocomplete() {
                     var place = results[i];
                     var newMarker = new google.maps.Marker({
                         map: map,
-                        icon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
+                        icon: redMarker,
                         position: place.geometry.location,
                         title: place.name,
                         animation: google.maps.Animation.DROP,
@@ -913,7 +986,7 @@ function initAutocomplete() {
 
                     google.maps.event.addListener(newMarker, "click", function (newMarker, place) {
                         return function () {
-                            toggleMarker(newMarker);
+                            toggleMarker(newMarker,redMarker,blueMarker);
                             if (place.photos) {
                                 photoUrl = place.photos[0].getUrl({ maxWidth: 640 });
                             }
@@ -921,11 +994,12 @@ function initAutocomplete() {
                                 photoUrl = noImageFound;
                             }
 
-                           let  content_string = `<div class="card" style="width: 20rem;">
+                            var infoExtra = place.vicinity || place.name || place.formatted_address || "";
+                            let content_string = `<div class="card" style="width: 20rem;">
                     <img class="card-img-top" src="${photoUrl}" height="10%" width="100%" >
                     <div class="card-block">
                       <h4 class="card-title">${place.name}</h4>
-                      <p class="card-text">${place.vicinity}.</p>
+                      <p class="card-text">${infoExtra}.</p>
                       <a href="#" class="btn btn-primary">View in google maps</a>
                     </div>
                   </div>`;
@@ -942,12 +1016,12 @@ function initAutocomplete() {
     }
 
     // Functionality to toggle markers
-    function toggleMarker(marker) {
-        if (marker.icon == "http://maps.google.com/mapfiles/ms/icons/red-dot.png") {
-            marker.setIcon("http://maps.google.com/mapfiles/ms/icons/blue-dot.png");
+    function toggleMarker(marker,mcolor1,mcolor2) {
+        if (marker.icon == mcolor1) {
+            marker.setIcon(mcolor2);
         }
         else {
-            marker.setIcon("http://maps.google.com/mapfiles/ms/icons/red-dot.png");
+            marker.setIcon(mcolor1);
         }
     }
 
@@ -966,7 +1040,7 @@ function initAutocomplete() {
         findLocations(service, request);
     }
 
-  // Helper method to get all ATM
+    // Helper method to get all ATM
     function findAllATM() {
 
         setMapOnAll(null); // Delete all the markers being showed
@@ -980,7 +1054,7 @@ function initAutocomplete() {
         };
         findLocations(service, request);
     }
- 
+
     // Helper method to get all hospitals
     function findAllMed() {
 
@@ -1025,7 +1099,7 @@ function initAutocomplete() {
         };
         findLocations(service, request);
     }
-   //Attaching DOM methods to the google map.
+    //Attaching DOM methods to the google map.
     google.maps.event.addDomListener(restaurant, "click", findAllRestaurant);
     google.maps.event.addDomListener(atm, "click", findAllATM);
     google.maps.event.addDomListener(bank, "click", findAllBank);
@@ -1053,7 +1127,7 @@ function initAutocomplete() {
             return;
         }
 
-    // Clear out the old markers.
+        // Clear out the old markers.
         markers.forEach(function (marker) {
             marker.setMap(null);
         });
@@ -1072,23 +1146,24 @@ function initAutocomplete() {
             };
 
             if (place.photos) {
-                photoUrl = place.photos[0].getUrl({ maxWidth: 640 })
+                photoUrl = place.photos[0].getUrl({ maxWidth: 640 });
             }
             else {
                 photoUrl = noImageFound;
             }
-					var website;
+            var website;
             if (place.website) {
-                 website = ` <a href="${place.website}" class="btn btn-primary">Go to Website</a>`;
+                website = ` <a href="${place.website}" class="btn btn-primary">Go to Website</a>`;
             }
             else {
                 website = "";
             }
+            var infoLocExtra = place.vicinity || place.formatted_address || "";
             var contentString = `<div class="card" style="width: 20rem;">
         <img class="card-img-top" src="${photoUrl}" height="10%" width="100%" >
         <div class="card-block">
           <h4 class="card-title">${place.name}</h4>
-          <p class="card-text">${place.vicinity}.</p>
+          <p class="card-text">${infoLocExtra}.</p>
           ${website}
         </div>
       </div>`;
@@ -1116,7 +1191,7 @@ function initAutocomplete() {
 
 
             if (place.geometry.viewport) {
-            // Only geocodes have viewport.
+                // Only geocodes have viewport.
                 bounds.union(place.geometry.viewport);
             } else {
                 bounds.extend(place.geometry.location);

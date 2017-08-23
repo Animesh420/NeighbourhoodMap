@@ -2,7 +2,7 @@
 
 This project is about a neighbour hood map, based on bangalore.The prupose of this project
 is to show different areas and information related to them on a google map. 
-The basic model of the home page is taken from [here](https://getbootstrap.com/docs/3.3/examples/dashboard/).
+
 
 ## Application overview
 Neighbourhood Web Application has been implmented using Google Map APIs and knockout JS framework.
@@ -23,6 +23,10 @@ based on the **Foursquare API** . Also there is feature to mark visited places b
 
 * **Customization**: Though the map, is implemented only for bangalore, yet it can be used to see other locations of cities, by maintaining correct data in the **config.js** file.
 
+* **Location List View**: In the sidebar, a location functionality is displayed using knockout JS and Google Map APIs.
+When clicked upon, the infoWindow displays the image ( if available ) and address of the location.
+**NOTE**: Clicking this will not trigger a request to the Foursquare API as API requests are limited. Only travel wishlist, can be used to see extra information. Additionally there is a filter functionality, to filter out locations. By default the locations are hard coded, but can also be read from a service.
+
 * **Map displays**: The map can be seen in dark mode, night mode and aqua display, to adjust better to people's preference.
 
 * Test data: If you have never been to Bangalore, you can try googling information, or here is a list of some of the places.
@@ -37,7 +41,7 @@ based on the **Foursquare API** . Also there is feature to mark visited places b
  
         
 ## Getting Started
-* Clone the starter code from [here.](https://github.com/Animesh420/itemCatalog)
+* Clone the starter code from [here.](https://github.com/Animesh420/NeighbourhoodMap)
 
 
 ## Running the webpage
